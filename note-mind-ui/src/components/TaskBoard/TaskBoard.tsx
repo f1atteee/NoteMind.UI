@@ -1,4 +1,3 @@
-// TaskBoard.tsx (оновлено: DropResult тепер імпортується як type для сумісності з verbatimModuleSyntax)
 import React from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult, DroppableProvided, DraggableProvided } from '@hello-pangea/dnd';
@@ -8,7 +7,11 @@ import styles from './TaskBoard.module.scss';
 export interface Task {
     id: number;
     title: string;
+    description: string;
+    deadline?: string | null;
     status: 'todo' | 'inprogress' | 'done';
+    priority: number;
+    createdAt: string;
 }
 
 interface TaskBoardProps {
