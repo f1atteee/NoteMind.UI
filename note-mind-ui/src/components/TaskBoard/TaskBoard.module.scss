@@ -1,0 +1,36 @@
+@use'../../styles/vars' as vars;
+
+.taskBoard {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    padding: 16px;
+    background-color: vars.$color-backgroundDark;
+    min-height: 400px;
+
+    .column {
+        flex: 1;
+        min-width: 300px;
+        background-color: vars.$color-backgroundLight;
+        border-radius: vars.$border-radius;
+        padding: 16px;
+        box-shadow: vars.$shadow-card;
+
+        h3 {
+        margin-bottom: 16px;
+        color: vars.$color-textPrimary;
+        font-weight: 600;
+        text-align: center;
+        }
+
+        .droppableArea {
+        min-height: 200px;
+        }
+    }
+
+    .emptyList {
+        text-align: center;
+        color: vars.$color-textTimestamp;
+        padding: 16px;
+    }
+}

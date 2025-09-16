@@ -1,0 +1,45 @@
+@use 'sass:color';
+@use'./styles/vars' as vars;
+
+.appContainer {
+    padding-top: 40px;
+    max-width: 700px;
+    margin: 0 auto;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f6f8; 
+    min-height: 100vh;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: vars.$color-textPrimary; 
+    font-weight: 700;
+}
+
+.filterButtons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    
+    :global(.MuiButton-root) {
+        border-radius: 20px; 
+        text-transform: none;
+        font-weight: 500;
+        margin: 0 8px;
+        color: #616161;
+        background-color: #e0e0e0;
+        box-shadow: none;
+        transition: all 0.2s ease-in-out;
+
+        &:hover {
+            background-color: #bdbdbd;
+        }
+
+        &.Mui-disabled {
+            background-color: vars.$text-color;
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+    }
+}
