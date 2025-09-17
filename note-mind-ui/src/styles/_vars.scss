@@ -1,18 +1,34 @@
-@use 'sass:color';
+// Colors
+$color-primary: #007bff;
+$color-secondary: #6c757d;
+$color-success: #28a745;
+$color-danger: #dc3545;
+$color-white: #fff;
+$color-background: #f0f2f5;
+$color-card-background: #e9ecef;
 
-$font-primary: "Montserrat", sans-serif;
+// Text Colors
+$color-text-dark: #333;
+$color-text-medium: #666;
+$color-text-light: #999;
+$color-text-low: #155724;
+$color-text-medium-priority: #856404;
+$color-text-high-priority: #721c24;
 
-$color-backgroundDark: #ffffff;
-$color-backgroundLight: #f4f6f8;
-$color-accent: #2196F3;
-$color-light-accent: #e3f2fd;
-$color-textPrimary: #333333;
-$color-textTimestamp: #757575;
-$color-accent-text: #ffffff;
-$color-completed: #4CAF50;
-$color-inprogress: #FFC107;
-$color-todo: #FF5722;
-$shadow-card: 0 4px 8px rgba(0, 0, 0, 0.1);
-$border-radius: 8px;
+// Priority Colors
+$color-priority-low: #d4edda;
+$color-priority-medium: #fff3cd;
+$color-priority-high: #f8d7da;
 
-$text-color: #333333; 
+// Spacing
+$spacing-xs: 5px;
+$spacing-sm: 10px;
+$spacing-md: 15px;
+$spacing-lg: 20px;
+
+// Font Sizes
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.85rem;
+$font-size-md: 1rem;
+$font-size-lg: 1.5rem;
+$font-size-xl: 2rem;

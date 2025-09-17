@@ -1,125 +1,141 @@
-import React from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import type { DropResult, DroppableProvided, DraggableProvided } from '@hello-pangea/dnd';
-import TaskItem from '../TaskItem/TaskItem';
+import React, { useState, useEffect } from 'react';
+import type { DropResult } from '@hello-pangea/dnd';
+import { DragDropContext } from '@hello-pangea/dnd';
+import type { ITask, IUpdateTaskRequest, TaskStatus } from '../../types/task';
+import { TASK_STATUS } from '../../types/task';
+import { getTasks, updateTask, deleteTask } from '../../services/taskService';
+import TaskColumn from '../TaskColumn/TaskColumn';
+import TaskModal from '../TaskModal/TaskModal';
 import styles from './TaskBoard.module.scss';
 
-export interface Task {
-    id: number;
-    title: string;
-    description: string;
-    deadline?: string | null;
-    status: 'todo' | 'inprogress' | 'done';
-    priority: number;
-    createdAt: string;
-}
-
 interface TaskBoardProps {
-    tasks: Task[];
-    onUpdateTask: (id: number, payload: Partial<Task>) => void;
-    onDeleteTask: (id: number) => void;
-    onReorderTasks: (updatedTasks: Task[]) => void;
+    onTasksChanged: () => void;
 }
 
-const TaskBoard: React.FC<TaskBoardProps> = ({ tasks, onUpdateTask, onDeleteTask, onReorderTasks }) => {
-    const columns = {
-        todo: tasks.filter(task => task.status === 'todo'),
-        inprogress: tasks.filter(task => task.status === 'inprogress'),
-        done: tasks.filter(task => task.status === 'done'),
+const TaskBoard: React.FC<TaskBoardProps> = ({ onTasksChanged }) => {
+    const [tasks, setTasks] = useState<ITask[]>([]);
+    const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetchTasks();
+    }, [onTasksChanged]);
+
+    const fetchTasks = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const allTasks = await getTasks();
+            setTasks(allTasks);
+        } catch (err) {
+            setError('Не вдалося завантажити завдання. Спробуйте пізніше.');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const onDragEnd = (result: DropResult) => {
-        const { source, destination } = result;
+    const handleTaskClick = (task: ITask) => {
+        setSelectedTask(task);
+        setIsModalOpen(true);
+    };
+
+    const handleModalClose = () => {
+        setSelectedTask(null);
+        setIsModalOpen(false);
+        fetchTasks(); // Оновлюємо список після закриття модалки, якщо зміни були
+    };
+
+    const handleTaskUpdate = async (id: number, updatedTask: IUpdateTaskRequest) => {
+        try {
+            await updateTask(id, updatedTask);
+            fetchTasks();
+        } catch (err) {
+            console.error('Помилка при оновленні завдання:', err);
+        }
+    };
+
+    const handleTaskDelete = async (id: number) => {
+        try {
+            await deleteTask(id);
+            fetchTasks();
+        } catch (err) {
+            console.error('Помилка при видаленні завдання:', err);
+        }
+    };
+
+    const onDragEnd = async (result: DropResult) => {
+        const { destination, source, draggableId } = result;
 
         if (!destination) return;
+        if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-        if (source.droppableId === destination.droppableId) {
-            // Reorder within the same column
-            const column = columns[source.droppableId as keyof typeof columns];
-            const newColumn = Array.from(column);
-            const [removed] = newColumn.splice(source.index, 1);
-            newColumn.splice(destination.index, 0, removed);
+        const taskToMove = tasks.find(t => t.id === Number(draggableId));
+        if (!taskToMove) return;
 
-            // Update tasks
-            const updatedTasks = tasks.map(task => {
-                const indexInNew = newColumn.findIndex(t => t.id === task.id);
-                return indexInNew !== -1 ? newColumn[indexInNew] : task;
-            });
-            onReorderTasks(updatedTasks);
-        } else {
-            // Move between columns and update status
-            const sourceColumn = columns[source.droppableId as keyof typeof columns];
-            const destColumn = columns[destination.droppableId as keyof typeof columns];
-            const newSource = Array.from(sourceColumn);
-            const newDest = Array.from(destColumn);
-            const [removed] = newSource.splice(source.index, 1);
-            removed.status = destination.droppableId as Task['status'];
-            newDest.splice(destination.index, 0, removed);
-
-            // Update tasks
-            const updatedTasks = tasks.map(task => {
-                if (task.id === removed.id) return removed;
-                return task;
-            });
-            onReorderTasks(updatedTasks);
-            onUpdateTask(removed.id, { status: removed.status });
-        }
-    };
-
-    const renderColumn = (columnId: keyof typeof columns) => {
-        const columnTasks = columns[columnId];
-        if (columnTasks.length === 0) {
-            return <p className={styles.emptyList}>Немає завдань</p>;
-        }
-
-        return (
-            <Droppable droppableId={columnId}>
-                {(provided: DroppableProvided) => (
-                    <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={styles.droppableArea}
-                    >
-                        {columnTasks.map((task, index) => (
-                            <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-                                {(provided: DraggableProvided) => (
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                    >
-                                        <TaskItem
-                                            task={task}
-                                            onUpdateTask={onUpdateTask}
-                                            onDeleteTask={onDeleteTask}
-                                        />
-                                    </div>
-                                )}
-                            </Draggable>
-                        ))}
-                        {provided.placeholder}
-                    </div>
-                )}
-            </Droppable>
+        const newStatus = Number(destination.droppableId) as TaskStatus;
+        const updatedTaskData: IUpdateTaskRequest = {
+        ...taskToMove,
+        status: newStatus,
+        };
+        
+        // Оновлюємо локальний стан для миттєвого відображення
+        const updatedTasks = tasks.map(task =>
+            task.id === taskToMove.id ? { ...task, status: newStatus } : task
         );
+        setTasks(updatedTasks);
+
+        // Відправляємо зміни на сервер
+        try {
+            await updateTask(taskToMove.id, updatedTaskData);
+            onTasksChanged(); // Оновлюємо дошку після успішного запиту
+        } catch (err) {
+            console.error('Помилка при оновленні завдання на сервері:', err);
+            // Можна відновити старий стан, якщо запит не пройшов
+            fetchTasks();
+        }
     };
+
+    if (loading) return <div className={styles.loading}>Завантаження завдань...</div>;
+
+    if (error) return <div className={styles.error}>{error}</div>;
+
+    const activeTasks = tasks.filter(t => t.status === TASK_STATUS.Active);
+    const inProgressTasks = tasks.filter(t => t.status === TASK_STATUS.InProgress);
+    const completedTasks = tasks.filter(t => t.status === TASK_STATUS.Completed);
 
     return (
         <DragDropContext onDragEnd={onDragEnd}>
-            <div className={styles.taskBoard}>
-                <div className={styles.column}>
-                    <h3>To Do</h3>
-                    {renderColumn('todo')}
-                </div>
-                <div className={styles.column}>
-                    <h3>In Progress</h3>
-                    {renderColumn('inprogress')}
-                </div>
-                <div className={styles.column}>
-                    <h3>Done</h3>
-                    {renderColumn('done')}
-                </div>
-            </div>
+        <div className={styles.taskBoard}>
+            <TaskColumn
+                title="Активні"
+                tasks={activeTasks}
+                status={TASK_STATUS.Active}
+                onTaskClick={handleTaskClick}
+            />
+            <TaskColumn
+                title="У роботі"
+                tasks={inProgressTasks}
+                status={TASK_STATUS.InProgress}
+                onTaskClick={handleTaskClick}
+            />
+            <TaskColumn
+                title="Виконані"
+                tasks={completedTasks}
+                status={TASK_STATUS.Completed}
+                onTaskClick={handleTaskClick}
+            />
+            {isModalOpen && selectedTask && (
+            <TaskModal
+                task={selectedTask}
+                onClose={handleModalClose}
+                onUpdate={handleTaskUpdate}
+                onDelete={handleTaskDelete}
+            />
+            )}
+        </div>
         </DragDropContext>
     );
 };

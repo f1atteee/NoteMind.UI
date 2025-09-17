@@ -1,0 +1,29 @@
+@use '../../styles/vars.scss' as vars;
+
+.taskColumn {
+    background-color: vars.$color-card-background;
+    border-radius: vars.$spacing-md;
+    padding: vars.$spacing-md;
+    display: flex;
+    flex-direction: column;
+    gap: vars.$spacing-sm;
+    flex: 1;
+}
+
+.title {
+    text-align: center;
+    color: vars.$color-text-dark;
+    font-size: vars.$font-size-lg;
+    margin: 0;
+    padding-bottom: vars.$spacing-xs;
+    border-bottom: 2px solid vars.$color-text-light;
+}
+
+.list {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: vars.$spacing-sm;
+    padding-right: vars.$spacing-xs;
+}

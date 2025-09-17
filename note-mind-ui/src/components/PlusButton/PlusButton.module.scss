@@ -1,0 +1,27 @@
+@use '../../styles/vars.scss' as vars;
+@use 'sass:color';
+
+.plusButton {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: vars.$color-success;
+    color: vars.$color-white;
+    border: none;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    position: fixed;
+    bottom: vars.$spacing-lg;
+    right: vars.$spacing-lg;
+    z-index: 999;
+}
+
+.plusButton:hover {
+    background-color: color.adjust(vars.$color-success, $lightness: -10%);
+    transform: scale(1.05);
+}

@@ -1,0 +1,58 @@
+@use '../../styles/vars.scss' as vars;
+
+.taskCard {
+    background-color: vars.$color-white;
+    border-radius: 6px;
+    padding: vars.$spacing-md;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: vars.$spacing-xs;
+}
+
+.title {
+    font-size: vars.$font-size-md;
+    margin: 0;
+    color: vars.$color-text-dark;
+}
+
+.description {
+    font-size: vars.$font-size-sm;
+    color: vars.$color-text-medium;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.priority {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: vars.$font-size-xs;
+    font-weight: bold;
+
+    &.low {
+        background-color: vars.$color-priority-low;
+        color: vars.$color-text-low;
+    }
+
+    &.medium {
+        background-color: vars.$color-priority-medium;
+        color: vars.$color-text-medium-priority;
+    }
+
+    &.high {
+        background-color: vars.$color-priority-high;
+        color: vars.$color-text-high-priority;
+    }
+}
